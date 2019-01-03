@@ -1,0 +1,9 @@
+D:\Anton\Desktop\Quick View\Quick View\bin\Release\Quick View.exe.config
+D:\Anton\Desktop\Quick View\Quick View\bin\Release\Quick View.exe
+D:\Anton\Desktop\Quick View\Quick View\bin\Release\Quick View.pdb
+D:\Anton\Desktop\Quick View\Quick View\obj\Release\Quick_View.Form1.resources
+D:\Anton\Desktop\Quick View\Quick View\obj\Release\Quick_View.Properties.Resources.resources
+D:\Anton\Desktop\Quick View\Quick View\obj\Release\Quick View.csproj.GenerateResource.Cache
+D:\Anton\Desktop\Quick View\Quick View\obj\Release\Quick View.csproj.CoreCompileInputs.cache
+D:\Anton\Desktop\Quick View\Quick View\obj\Release\Quick View.exe
+D:\Anton\Desktop\Quick View\Quick View\obj\Release\Quick View.pdb
