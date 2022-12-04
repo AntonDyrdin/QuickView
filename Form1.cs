@@ -14,7 +14,7 @@ namespace Quick_View
     int mouseX, mouseY;
     int zoomStep = 100;
     bool showInterface = true;
-
+    bool windowedMode = false;
     public Form1(string[] args)
     {
       InitializeComponent();
@@ -23,8 +23,8 @@ namespace Quick_View
       this.MouseWheel += new MouseEventHandler(this.onMouseWheel);
       windowedClick(null, null);
 
-      //args = new string[1];
-      //args[0] = "E:/Anton/Pictures/Фото/Meizu 16/P21105-131942.jpg";
+     // args = new string[1];
+     // args[0] = "E:/Anton/Pictures/Фото/Meizu 16/P21105-131942.jpg";
       drawImage(args[0]);
 
       var files = System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(args[0]));
@@ -44,8 +44,6 @@ namespace Quick_View
           imageInFolderIndex = i;
       }
 
-
-
       collapse.FlatAppearance.MouseOverBackColor =
        rotate.FlatAppearance.MouseOverBackColor =
        windowed.FlatAppearance.MouseOverBackColor =
@@ -54,7 +52,7 @@ namespace Quick_View
     void drawImage(string path)
     {
       Image img = Image.FromFile(path);
-      pictureBox1.Size = new Size(img.Width, img.Height);
+      pictureBox1.Size = img.Size;
       pictureBox1.Image = img;
 
       this.Text = System.IO.Path.GetFileName(path);
@@ -72,24 +70,26 @@ namespace Quick_View
         showInterface = Cursor.Position.Y - this.Location.Y < 100;
         close.Visible = collapse.Visible = rotate.Visible = windowed.Visible = showInterface;
       }
-
+      if (!windowedMode)
+      {
         if ((Cursor.Position.Y > Screen.FromHandle(this.Handle).Bounds.Height - 100))
         {
           if (this.WindowState == FormWindowState.Maximized)
           {
-          this.Height = Screen.FromHandle(this.Handle).WorkingArea.Height;
-          this.WindowState = FormWindowState.Normal;
+            this.Height = Screen.FromHandle(this.Handle).WorkingArea.Height;
+            this.WindowState = FormWindowState.Normal;
           }
         }
         else
         {
           if (this.WindowState == FormWindowState.Normal)
           {
-          
-          this.WindowState = FormWindowState.Maximized;
-          
+
+            this.WindowState = FormWindowState.Maximized;
+
           }
         }
+      }
     }
 
     private void onMouseWheel(object sender, MouseEventArgs e)
@@ -165,8 +165,13 @@ namespace Quick_View
     {
       if (this.WindowState == FormWindowState.Maximized)
       {
+        windowedMode = true;
         windowed.Text = "⭘";
         this.WindowState = FormWindowState.Normal;
+        if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width / 2)
+          pictureBox1.Width = Screen.FromHandle(this.Handle).Bounds.Width / 2;
+        if (pictureBox1.Height > Screen.FromHandle(this.Handle).Bounds.Height / 2)
+          pictureBox1.Height = Screen.FromHandle(this.Handle).Bounds.Height / 2;
         this.Size = pictureBox1.Size;
         pictureBox1.Location = new Point(0, 0);
         close.Location = new Point(this.Size.Width - collapse.Width, 0);
@@ -180,6 +185,7 @@ namespace Quick_View
 
       if (this.WindowState == FormWindowState.Normal)
       {
+        windowedMode = false;
         windowed.Text = "⯏";
         this.WindowState = FormWindowState.Maximized;
         this.Location = new Point(Screen.FromHandle(this.Handle).WorkingArea.X, Screen.FromHandle(this.Handle).WorkingArea.Y);
@@ -188,6 +194,12 @@ namespace Quick_View
         collapse.Location = new Point(this.Size.Width - close.Width - collapse.Width, 0);
         windowed.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width, 0);
         rotate.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width - rotate.Width, 0);
+        if (pictureBox1.Image != null)
+          pictureBox1.Size = pictureBox1.Image.Size;
+        if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width || pictureBox1.Height > Screen.FromHandle(this.Handle).Bounds.Height)
+        {
+          pictureBox1.Height = Screen.FromHandle(this.Handle).Bounds.Height;
+        }
         pictureBox1.Location = new Point(Convert.ToInt16((Convert.ToDouble(this.Width) / 2.0) - (Convert.ToDouble(pictureBox1.Width) / 2.0)), Convert.ToInt16((Convert.ToDouble(this.Height) / 2.0) - (Convert.ToDouble(pictureBox1.Height) / 2.0)));
 
         checkForCursor();
