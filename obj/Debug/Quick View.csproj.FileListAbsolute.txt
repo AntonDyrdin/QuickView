@@ -8,3 +8,12 @@ D:\Anton\Desktop\Quick View\Quick View\obj\Debug\Quick View.csproj.CoreCompileIn
 D:\Anton\Desktop\Quick View\Quick View\obj\Debug\Quick View.exe
 D:\Anton\Desktop\Quick View\Quick View\obj\Debug\Quick View.pdb
 D:\Anton\Desktop\Quick View\Quick View\obj\Debug\Quick View.csprojResolveAssemblyReference.cache
+C:\Users\Anton\development\QuickView\bin\Debug\Quick View.exe.config
+C:\Users\Anton\development\QuickView\bin\Debug\Quick View.exe
+C:\Users\Anton\development\QuickView\bin\Debug\Quick View.pdb
+C:\Users\Anton\development\QuickView\obj\Debug\Quick View.csprojAssemblyReference.cache
+C:\Users\Anton\development\QuickView\obj\Debug\Quick_View.Form1.resources
+C:\Users\Anton\development\QuickView\obj\Debug\Quick_View.Properties.Resources.resources
+C:\Users\Anton\development\QuickView\obj\Debug\Quick View.csproj.GenerateResource.cache
+C:\Users\Anton\development\QuickView\obj\Debug\Quick View.exe
+C:\Users\Anton\development\QuickView\obj\Debug\Quick View.pdb

