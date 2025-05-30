@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Quick_View
 {
@@ -23,8 +24,8 @@ namespace Quick_View
       this.MouseWheel += new MouseEventHandler(this.onMouseWheel);
       windowedClick(null, null);
 
-     // args = new string[1];
-     // args[0] = "E:/Anton/Pictures/Фото/Meizu 16/P21105-131942.jpg";
+      args = new string[1];
+      args[0] = "E:/Anton/Pictures/Фото/Meizu 16/2021-07-08T21_4443+0300.JPEG";
       drawImage(args[0]);
 
       var files = System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(args[0]));
@@ -51,17 +52,25 @@ namespace Quick_View
     }
     void drawImage(string path)
     {
-      Image img = Image.FromFile(path);
-      pictureBox1.Size = img.Size;
-      pictureBox1.Image = img;
-
-      this.Text = System.IO.Path.GetFileName(path);
-      int h = Screen.FromHandle(this.Handle).Bounds.Height;
-      if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width || pictureBox1.Height > Screen.FromHandle(this.Handle).Bounds.Height)
+      if (pictureBox1.Image != null)
       {
-        pictureBox1.Height = Screen.FromHandle(this.Handle).Bounds.Height;
+        pictureBox1.Image.Dispose();
+        pictureBox1.Image = null;
       }
-      pictureBox1.Location = new Point(Convert.ToInt16((Convert.ToDouble(this.Width) / 2.0) - (Convert.ToDouble(pictureBox1.Width) / 2.0)), Convert.ToInt16((Convert.ToDouble(this.Height) / 2.0) - (Convert.ToDouble(pictureBox1.Height) / 2.0)));
+
+      using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+      {
+        pictureBox1.Image = Image.FromStream(fs);
+        pictureBox1.Size = pictureBox1.Image.Size;
+
+        this.Text = System.IO.Path.GetFileName(path);
+        int h = Screen.FromHandle(this.Handle).Bounds.Height;
+        if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width || pictureBox1.Height > Screen.FromHandle(this.Handle).Bounds.Height)
+        {
+          pictureBox1.Height = Screen.FromHandle(this.Handle).Bounds.Height;
+        }
+        pictureBox1.Location = new Point(Convert.ToInt16((Convert.ToDouble(this.Width) / 2.0) - (Convert.ToDouble(pictureBox1.Width) / 2.0)), Convert.ToInt16((Convert.ToDouble(this.Height) / 2.0) - (Convert.ToDouble(pictureBox1.Height) / 2.0)));
+      }
     }
     void checkForCursor()
     {
@@ -143,6 +152,45 @@ namespace Quick_View
         drawImage(images[imageInFolderIndex]);
       }
 
+      if (e.KeyCode == Keys.Delete)
+      {
+        string currentImage = images[imageInFolderIndex];
+        var result = MessageBox.Show($"Удалить файл?\n{currentImage}", "Подтверждение удаления",
+                                      MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+        if (result == DialogResult.Yes)
+        {
+          try
+          {
+            // Обновляем список файлов
+            var list = new List<string>(images);
+            list.RemoveAt(imageInFolderIndex);
+
+            images = list.ToArray();
+
+            // Корректируем индекс
+            if (imageInFolderIndex >= images.Length)
+              imageInFolderIndex = images.Length - 1;
+
+            if (images.Length > 0)
+            {
+              drawImage(images[imageInFolderIndex]);
+            }
+            else
+            {
+              // Очистить изображение, если файлов больше нет
+              pictureBox1.Image = null;
+            }
+
+            System.IO.File.Delete(currentImage);
+          }
+          catch (Exception ex)
+          {
+            MessageBox.Show($"Ошибка при удалении файла:\n{ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+          }
+        }
+      }
+
       GC.Collect();
     }
 
@@ -166,7 +214,7 @@ namespace Quick_View
       if (this.WindowState == FormWindowState.Maximized)
       {
         windowedMode = true;
-        windowed.Text = "⭘";
+        windowed.Text = "◳";
         this.WindowState = FormWindowState.Normal;
         if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width / 2)
           pictureBox1.Width = Screen.FromHandle(this.Handle).Bounds.Width / 2;
@@ -186,7 +234,7 @@ namespace Quick_View
       if (this.WindowState == FormWindowState.Normal)
       {
         windowedMode = false;
-        windowed.Text = "⯏";
+        windowed.Text = "◳";
         this.WindowState = FormWindowState.Maximized;
         this.Location = new Point(Screen.FromHandle(this.Handle).WorkingArea.X, Screen.FromHandle(this.Handle).WorkingArea.Y);
         this.Size = new Size(Screen.FromHandle(this.Handle).Bounds.Width, Screen.FromHandle(this.Handle).Bounds.Height);
@@ -246,6 +294,11 @@ namespace Quick_View
     public static extern uint GetImmersiveColorTypeFromName(IntPtr pName);
     [DllImport("uxtheme.dll", EntryPoint = "#98")]
     public static extern int GetImmersiveUserColorSetPreference(bool bForceCheckRegistry, bool bSkipCheckOnFail);
+
+    private void Form1_Load(object sender, EventArgs e)
+    {
+
+    }
 
     public Color GetThemeColor()
     {

@@ -124,7 +124,7 @@
       this.windowed.Size = new System.Drawing.Size(102, 48);
       this.windowed.TabIndex = 15;
       this.windowed.TabStop = false;
-      this.windowed.Text = "⯏";
+      this.windowed.Text = "◳";
       this.windowed.UseVisualStyleBackColor = false;
       this.windowed.Click += new System.EventHandler(this.windowedClick);
       // 
@@ -147,6 +147,7 @@
       this.ShowIcon = false;
       this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
       this.Text = "Form1";
+      this.Load += new System.EventHandler(this.Form1_Load);
       this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
       this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
       this.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.Form1_PreviewKeyDown);
