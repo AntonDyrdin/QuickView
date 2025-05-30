@@ -24,8 +24,8 @@ namespace Quick_View
       this.MouseWheel += new MouseEventHandler(this.onMouseWheel);
       windowedClick(null, null);
 
-      args = new string[1];
-      args[0] = "E:/Anton/Pictures/Фото/Meizu 16/2021-07-08T21_4443+0300.JPEG";
+      //args = new string[1];
+      //args[0] = "E:/Anton/Pictures/Фото/Meizu 16/2021-07-08T21_4443+0300.JPEG";
       drawImage(args[0]);
 
       var files = System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(args[0]));
