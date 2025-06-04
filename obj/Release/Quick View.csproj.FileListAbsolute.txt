@@ -15,4 +15,3 @@ C:\Users\Anton\development\QuickView\obj\Release\Quick_View.Properties.Resources
 C:\Users\Anton\development\QuickView\obj\Release\Quick View.csproj.GenerateResource.cache
 C:\Users\Anton\development\QuickView\obj\Release\Quick View.exe
 C:\Users\Anton\development\QuickView\obj\Release\Quick View.pdb
-C:\Users\Anton\development\QuickView\obj\Release\Quick View.csprojAssemblyReference.cache
