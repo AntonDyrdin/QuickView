@@ -80,6 +80,7 @@
       // 
       this.pictureBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(49)))), ((int)(((byte)(49)))), ((int)(((byte)(49)))));
       this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+      this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
       this.pictureBox1.Name = "pictureBox1";
       this.pictureBox1.Size = new System.Drawing.Size(516, 222);
       this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -147,6 +148,7 @@
       this.ShowIcon = false;
       this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
       this.Text = "Form1";
+      this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
       this.Load += new System.EventHandler(this.Form1_Load);
       this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
       this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);

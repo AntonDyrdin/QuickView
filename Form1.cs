@@ -22,10 +22,11 @@ namespace Quick_View
 
       this.KeyPreview = true;
       this.MouseWheel += new MouseEventHandler(this.onMouseWheel);
-      windowedClick(null, null);
+      setMaximizedState();
 
       //args = new string[1];
-      //args[0] = "E:/Anton/Pictures/Фото/Meizu 16/2021-07-08T21_4443+0300.JPEG";
+      //args[0] = "E://Anton//Pictures//Фото//Meizu 16//IMG_20200816_185904.jpg";
+      //args[0] = "C://Users//Anton//Downloads//Telegram Desktop//355//PNG//Type 1//RUS//25_6410-PG-448_type1_rus.png";
       drawImage(args[0]);
 
       var files = System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(args[0]));
@@ -64,12 +65,7 @@ namespace Quick_View
         pictureBox1.Size = pictureBox1.Image.Size;
 
         this.Text = System.IO.Path.GetFileName(path);
-        int h = Screen.FromHandle(this.Handle).Bounds.Height;
-        if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width || pictureBox1.Height > Screen.FromHandle(this.Handle).Bounds.Height)
-        {
-          pictureBox1.Height = Screen.FromHandle(this.Handle).Bounds.Height;
-        }
-        pictureBox1.Location = new Point(Convert.ToInt16((Convert.ToDouble(this.Width) / 2.0) - (Convert.ToDouble(pictureBox1.Width) / 2.0)), Convert.ToInt16((Convert.ToDouble(this.Height) / 2.0) - (Convert.ToDouble(pictureBox1.Height) / 2.0)));
+        setPictureBoxSize();
       }
     }
     void checkForCursor()
@@ -213,19 +209,7 @@ namespace Quick_View
     {
       if (this.WindowState == FormWindowState.Maximized)
       {
-        windowedMode = true;
-        windowed.Text = "◳";
-        this.WindowState = FormWindowState.Normal;
-        if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width / 2)
-          pictureBox1.Width = Screen.FromHandle(this.Handle).Bounds.Width / 2;
-        if (pictureBox1.Height > Screen.FromHandle(this.Handle).Bounds.Height / 2)
-          pictureBox1.Height = Screen.FromHandle(this.Handle).Bounds.Height / 2;
-        this.Size = pictureBox1.Size;
-        pictureBox1.Location = new Point(0, 0);
-        close.Location = new Point(this.Size.Width - collapse.Width, 0);
-        collapse.Location = new Point(this.Size.Width - close.Width - collapse.Width, 0);
-        windowed.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width, 0);
-        rotate.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width - rotate.Width, 0);
+        setNormalState();
 
         checkForCursor();
         return;
@@ -233,25 +217,69 @@ namespace Quick_View
 
       if (this.WindowState == FormWindowState.Normal)
       {
-        windowedMode = false;
-        windowed.Text = "◳";
-        this.WindowState = FormWindowState.Maximized;
-        this.Location = new Point(Screen.FromHandle(this.Handle).WorkingArea.X, Screen.FromHandle(this.Handle).WorkingArea.Y);
-        this.Size = new Size(Screen.FromHandle(this.Handle).Bounds.Width, Screen.FromHandle(this.Handle).Bounds.Height);
-        close.Location = new Point(this.Size.Width - collapse.Width, 0);
-        collapse.Location = new Point(this.Size.Width - close.Width - collapse.Width, 0);
-        windowed.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width, 0);
-        rotate.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width - rotate.Width, 0);
-        if (pictureBox1.Image != null)
-          pictureBox1.Size = pictureBox1.Image.Size;
-        if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width || pictureBox1.Height > Screen.FromHandle(this.Handle).Bounds.Height)
-        {
-          pictureBox1.Height = Screen.FromHandle(this.Handle).Bounds.Height;
-        }
-        pictureBox1.Location = new Point(Convert.ToInt16((Convert.ToDouble(this.Width) / 2.0) - (Convert.ToDouble(pictureBox1.Width) / 2.0)), Convert.ToInt16((Convert.ToDouble(this.Height) / 2.0) - (Convert.ToDouble(pictureBox1.Height) / 2.0)));
+        setMaximizedState();
 
         checkForCursor();
         return;
+      }
+    }
+
+    private void setNormalState()
+    {
+      this.TopMost = true;
+      windowedMode = true;
+      windowed.Text = "◳";
+      this.WindowState = FormWindowState.Normal;
+      setPictureBoxSize();
+      this.Size = pictureBox1.Size;
+      pictureBox1.Location = new Point(0, 0);
+      close.Location = new Point(this.Size.Width - collapse.Width, 0);
+      collapse.Location = new Point(this.Size.Width - close.Width - collapse.Width, 0);
+      windowed.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width, 0);
+      rotate.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width - rotate.Width, 0);
+    }
+
+    private void setMaximizedState()
+    {
+      int ww = Screen.FromHandle(this.Handle).Bounds.Width;
+      this.TopMost = false;
+      windowedMode = false;
+      windowed.Text = "◳";
+      this.WindowState = FormWindowState.Maximized;
+      this.Location = new Point(Screen.FromHandle(this.Handle).WorkingArea.X, Screen.FromHandle(this.Handle).WorkingArea.Y);
+      this.Size = new Size(Screen.FromHandle(this.Handle).Bounds.Width, Screen.FromHandle(this.Handle).Bounds.Height);
+      close.Location = new Point(this.Size.Width - collapse.Width, 0);
+      collapse.Location = new Point(this.Size.Width - close.Width - collapse.Width, 0);
+      windowed.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width, 0);
+      rotate.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width - rotate.Width, 0);
+      if (pictureBox1.Image != null)
+        pictureBox1.Size = pictureBox1.Image.Size;
+
+      setPictureBoxSize();
+    }
+
+    private void setPictureBoxSize()
+    {
+      if (windowedMode)
+      {
+        if (pictureBox1.Width > Screen.FromHandle(this.Handle).Bounds.Width / 2)
+          pictureBox1.Width = Screen.FromHandle(this.Handle).Bounds.Width / 2;
+        if (pictureBox1.Height > Screen.FromHandle(this.Handle).Bounds.Height / 2)
+          pictureBox1.Height = Screen.FromHandle(this.Handle).Bounds.Height / 2;
+      }
+      else
+      {
+        int h = Screen.FromHandle(this.Handle).Bounds.Height;
+        int w = Screen.FromHandle(this.Handle).Bounds.Width;
+        if (pictureBox1.Height > h)
+        {
+          pictureBox1.Height = h;
+        }
+        if (pictureBox1.Width > w)
+        {
+          pictureBox1.Width = w;
+        }
+        pictureBox1.Location = new Point(Convert.ToInt16((Convert.ToDouble(w) / 2.0) - (Convert.ToDouble(pictureBox1.Width) / 2.0)), Convert.ToInt16((Convert.ToDouble(h) / 2.0) - (Convert.ToDouble(pictureBox1.Height) / 2.0)));
       }
     }
 
