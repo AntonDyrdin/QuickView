@@ -16,3 +16,12 @@ C:\Users\Anton\development\QuickView\obj\Release\Quick View.csproj.GenerateResou
 C:\Users\Anton\development\QuickView\obj\Release\Quick View.exe
 C:\Users\Anton\development\QuickView\obj\Release\Quick View.pdb
 C:\Users\Anton\development\QuickView\obj\Release\Quick View.csprojAssemblyReference.cache
+D:\dev\QuickView\bin\Release\Quick View.exe.config
+D:\dev\QuickView\bin\Release\Quick View.exe
+D:\dev\QuickView\bin\Release\Quick View.pdb
+D:\dev\QuickView\obj\Release\Quick_View.Form1.resources
+D:\dev\QuickView\obj\Release\Quick_View.Properties.Resources.resources
+D:\dev\QuickView\obj\Release\Quick View.csproj.GenerateResource.cache
+D:\dev\QuickView\obj\Release\Quick View.csproj.CoreCompileInputs.cache
+D:\dev\QuickView\obj\Release\Quick View.exe
+D:\dev\QuickView\obj\Release\Quick View.pdb

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Diagnostics;
 using System.IO;
 
 namespace Quick_View
@@ -25,17 +26,23 @@ namespace Quick_View
       setMaximizedState();
 
       //args = new string[1];
-      //args[0] = "E://Anton//Pictures//Фото//Meizu 16//IMG_20200816_185904.jpg";
-      //args[0] = "C://Users//Anton//Downloads//Telegram Desktop//355//PNG//Type 1//RUS//25_6410-PG-448_type1_rus.png";
+      //args[0] = "C:/Users/anton/Рабочий стол/Снимок экрана 2025-06-27 031311.png";
       drawImage(args[0]);
 
       var files = System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(args[0]));
       List<string> sort = new List<string>();
+      string[] extensions = { ".jpg", ".png", ".bmp", ".ico", ".gif", ".jpeg", ".webp" };
+
       for (int i = 0; i < files.Length; i++)
       {
-        if (files[i].Contains(".jpg") || files[i].Contains(".png") || files[i].Contains(".bmp") || files[i].Contains(".ico") || files[i].Contains(".gif") || files[i].Contains(".jpeg")
-          || files[i].Contains(".JPG") || files[i].Contains(".PNG") || files[i].Contains(".BMP") || files[i].Contains(".ICO") || files[i].Contains(".GIF") || files[i].Contains(".JPEG"))
-        { sort.Add(files[i]); }
+        foreach (var ext in extensions)
+        {
+          if (files[i].EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+          {
+            sort.Add(files[i]);
+            break;
+          }
+        }
       }
       images = new string[sort.Count];
       for (int i = 0; i < images.Length; i++)
@@ -55,9 +62,24 @@ namespace Quick_View
     {
       if (pictureBox1.Image != null)
       {
-        pictureBox1.Image.Dispose();
-        pictureBox1.Image = null;
+          pictureBox1.Image.Dispose();
+          pictureBox1.Image = null;
       }
+
+      string ext = Path.GetExtension(path).ToLower();
+      if (ext == ".webp")
+      {
+          string bmpPath = ConvertWebpToBmp(path);
+          if (bmpPath == null) return; // ошибка уже показана
+          path = bmpPath;
+      }
+
+      Image img = Image.FromFile(path);
+      pictureBox1.Size = img.Size;
+      pictureBox1.Image = img;
+
+      this.Text = System.IO.Path.GetFileName(path);
+      int h = Screen.FromHandle(this.Handle).Bounds.Height;
 
       using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read))
       {
@@ -248,10 +270,11 @@ namespace Quick_View
       this.WindowState = FormWindowState.Maximized;
       this.Location = new Point(Screen.FromHandle(this.Handle).WorkingArea.X, Screen.FromHandle(this.Handle).WorkingArea.Y);
       this.Size = new Size(Screen.FromHandle(this.Handle).Bounds.Width, Screen.FromHandle(this.Handle).Bounds.Height);
-      close.Location = new Point(this.Size.Width - collapse.Width, 0);
-      collapse.Location = new Point(this.Size.Width - close.Width - collapse.Width, 0);
-      windowed.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width, 0);
-      rotate.Location = new Point(this.Size.Width - close.Width - collapse.Width - windowed.Width - rotate.Width, 0);
+      int width = Screen.FromHandle(this.Handle).Bounds.Width;
+      close.Location = new Point(width - close.Width, 0);
+      collapse.Location = new Point(width - close.Width - collapse.Width, 0);
+      windowed.Location = new Point(width - close.Width - collapse.Width - windowed.Width, 0);
+      rotate.Location = new Point(width - close.Width - collapse.Width - windowed.Width - rotate.Width, 0);
       if (pictureBox1.Image != null)
         pictureBox1.Size = pictureBox1.Image.Size;
 
@@ -316,6 +339,36 @@ namespace Quick_View
       checkForCursor();
     }
 
+    string ConvertWebpToBmp(string path)
+    {
+        string tempFile = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(path) + ".bmp");
+
+        ProcessStartInfo psi = new ProcessStartInfo
+        {
+            FileName = "dwebp.exe",
+            Arguments = $"\"{path}\" -o \"{tempFile}\"",
+            CreateNoWindow = true,
+            UseShellExecute = false
+        };
+
+        try
+        {
+            Process proc = Process.Start(psi);
+            proc.WaitForExit();
+
+            if (File.Exists(tempFile))
+                return tempFile;
+            else
+                throw new Exception("Конвертация не удалась.");
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Ошибка при конвертации WebP:\n" + ex.Message);
+            return null;
+        }
+    }
+
+
     [DllImport("uxtheme.dll", EntryPoint = "#95")]
     public static extern uint GetImmersiveColorFromColorSetEx(uint dwImmersiveColorSet, uint dwImmersiveColorType, bool bIgnoreHighContrast, uint dwHighContrastCacheMode);
     [DllImport("uxtheme.dll", EntryPoint = "#96")]
@@ -325,7 +378,6 @@ namespace Quick_View
 
     private void Form1_Load(object sender, EventArgs e)
     {
-
     }
 
     public Color GetThemeColor()
